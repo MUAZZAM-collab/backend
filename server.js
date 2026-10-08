@@ -54,6 +54,8 @@ app.set("trust proxy", 1);
 
 app.use(helmet());
 app.use(cors(corsOptions));
+// Explicitly handle CORS preflight requests for all routes
+app.options("*", cors(corsOptions));
 app.use(morgan(NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true, limit: "100kb" }));
