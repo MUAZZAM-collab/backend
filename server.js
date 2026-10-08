@@ -9,7 +9,7 @@ import connectDB from "./src/config/db.js";
 import enquiryRoutes from "./src/routes/enquiryRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import { notFound, errorHandler } from "./src/middleware/errorHandler.js";
-import { generalLimiter } from "./src/middleware/rateLimit.js";
+import { generalLimiter } from "../backend/src/middleware/rateLimit.js";
 
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || "development";
