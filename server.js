@@ -9,29 +9,41 @@ import connectDB from "./src/config/db.js";
 import enquiryRoutes from "./src/routes/enquiryRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import { notFound, errorHandler } from "./src/middleware/errorHandler.js";
-import { generalLimiter } from "./src/middleware/rateLimit.js"; // ← FIXED
+import { generalLimiter } from "./src/middleware/rateLimit.js";
 
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
 // ---- CORS setup ----
-const allowedOrigins = (process.env.CORS_ORIGINS || "")
+const rawOrigins = (process.env.CORS_ORIGINS || "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 
+// "*" means allow every origin
+const allowAllOrigins = rawOrigins.includes("*");
+const allowedOrigins = rawOrigins.filter((o) => o !== "*");
+
 const corsOptions = {
   origin(origin, callback) {
-    // Allow requests with no origin (curl, Postman, server-to-server)
+    // No origin (curl, Postman, server-to-server) → always allow
     if (!origin) return callback(null, true);
-    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
+
+    // Explicit wildcard → allow everything
+    if (allowAllOrigins) return callback(null, true);
+
+    // Empty config → allow everything (dev convenience)
+    if (allowedOrigins.length === 0) return callback(null, true);
+
+    // Otherwise, check the allow list
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+
     return callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
   methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-admin-token"],
+  optionsSuccessStatus: 204,
 };
 
 // ---- App ----
@@ -73,7 +85,9 @@ async function start() {
     const server = app.listen(PORT, () => {
       console.log(`✅ API listening on http://localhost:${PORT}`);
       console.log(`   env: ${NODE_ENV}`);
-      console.log(`   CORS allowed: ${allowedOrigins.join(", ") || "(all)"}`);
+      console.log(
+        `   CORS: ${allowAllOrigins ? "wildcard (*)" : allowedOrigins.join(", ") || "(all)"}`,
+      );
     });
 
     const shutdown = async (signal) => {
