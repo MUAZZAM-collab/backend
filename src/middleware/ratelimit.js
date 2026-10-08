@@ -9,6 +9,9 @@ export const generalLimiter = rateLimit({
   message: { error: "Too many requests. Please try again later." },
 });
 
+
+
+
 // 5 submissions per 10 min per IP on the public enquiry endpoint
 export const submitLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
