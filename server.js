@@ -9,7 +9,7 @@ import connectDB from "./src/config/db.js";
 import enquiryRoutes from "./src/routes/enquiryRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import { notFound, errorHandler } from "./src/middleware/errorHandler.js";
-import { generalLimiter } from "../backend/src/middleware/rateLimit.js";
+import { generalLimiter } from "./src/middleware/rateLimit.js"; // ← FIXED
 
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -38,7 +38,7 @@ const corsOptions = {
 const app = express();
 
 app.disable("x-powered-by");
-app.set("trust proxy", 1); // needed for correct IPs behind Vercel/Render/etc.
+app.set("trust proxy", 1);
 
 app.use(helmet());
 app.use(cors(corsOptions));
@@ -76,7 +76,6 @@ async function start() {
       console.log(`   CORS allowed: ${allowedOrigins.join(", ") || "(all)"}`);
     });
 
-    // Graceful shutdown
     const shutdown = async (signal) => {
       console.log(`\n${signal} received — closing server…`);
       server.close(async () => {
